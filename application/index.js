@@ -3,6 +3,8 @@ dotenv.config({ path: './application/.env' });
 const express = require('express');
 const line = require('@line/bot-sdk');
 
+const {  handleEvent} = require('./handlers/handler'); 
+
 const app = express();
 const config = {
     channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
@@ -13,7 +15,7 @@ const client = new line.Client(config);
 
 app.post('/webhook', line.middleware(config), (req, res) => {
     Promise
-        .all(req.body.events.map(handleEvent))
+        .all(req.body.events.map(handleEvent)) // Use handleEvent from handler.js
         .then((result) => res.json(result))
         .catch((err) => {
             console.error(err);
@@ -21,16 +23,6 @@ app.post('/webhook', line.middleware(config), (req, res) => {
         });
 });
 
-function handleEvent(event) {
-    console.log(event); 
-    if (event.type !== 'message' || event.message.type !== 'text') {
-        return Promise.resolve(null);
-    }
-
-    return client.replyMessage(event.replyToken, {
-        type: 'text',
-        text: 'Hello, this is a reply bot!'
-    });
-}
-
-app.listen(process.env.PORT || PORT);
+app.listen(process.env.PORT || 3000, () => {
+    console.log("Server is running on port", process.env.PORT || 3000);
+});

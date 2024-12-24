@@ -1,104 +1,55 @@
-module.exports = async function handler(event) {
-  if (event.type === 'message' && event.message.type === 'text') {
-    const receivedText = event.message.text;
+const line = require('@line/bot-sdk');
+
+const client = new line.Client({
+    channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
+    channelSecret: process.env.CHANNEL_SECRET
+});
+
+// Simple handler functions for different actions
+const handleGetOrders = (event) => {
+    return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'You clicked new getOrders'
+    });
+}
+
+const handleGetProducts = (event) => {
+    return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'You clicked new getProducts'
+    });
+}
+
+const handleGetMemberInfo = (event) => {
+    return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'You clicked new getMemberInfo'
+    });
+}
+
+// Main event handler
+function handleEvent(event) {
+    console.log(event); // Debugging the incoming event
     
-    // Send the same text message back to the user
-    return {
-      type: 'text',
-      text: receivedText
-    };
-  }
+    // Check if the event is a postback event
+    if (event.type === 'postback') {
+        const data = event.postback.data;
 
-  // If it's not a text message, return null
-  return null;
-};
+        // Handle actions based on the postback data
+        if (data === 'flow=general&action=getOrders') {
+            return handleGetOrders(event);
+        } else if (data === 'flow=general&action=getProducts') {
+            return handleGetProducts(event);
+        } else if (data === 'flow=general&action=getMemberInfo') {
+            return handleGetMemberInfo(event);
+        }
+    }
 
-// const _ = require('lodash');  // Utility for object manipulation
-// const Product = require('../database/product.js');  // Your product database model
+    // Default response for other types of events (like text messages)
+    return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'Hello, this is a reply bot from handler!'
+    });
+}
 
-// // Handle incoming text messages and other events
-// const handleMessage = async (event) => {
-//   if (event.message.type === 'text') {
-//     const text = event.message.text;
-
-//     // Respond based on text message (for example, send a greeting)
-//     if (text === 'hello') {
-//       const message = {
-//         type: 'text',
-//         text: 'Hello, world!'
-//       };
-//       return message;
-//     }
-
-//     // Handle other text messages or actions here
-//     return {
-//       type: 'text',
-//       text: `You said: ${text}`
-//     };
-//   }
-
-//   return null;
-// };
-
-// // Handle postback events (such as when a user clicks a button)
-// const handlePostback = async (event) => {
-//   if (event.type === 'postback') {
-//     const data = event.postback.data;
-
-//     if (data === 'getProducts') {
-//       const products = await Product.readProducts();
-//       const carouselProducts = {
-//         type: 'template',
-//         altText: 'Available Products',
-//         imageAspectRatio: 'rectangle',
-//         imageSize: 'cover',
-//         template: {
-//           type: 'carousel',
-//           columns: _.map(products, product => ({
-//             thumbnailImageUrl: product.imgUrl,
-//             imageBackgroundColor: '#FFFFFF',
-//             title: product.name,
-//             text: product.detail,
-//             defaultAction: {
-//               type: 'uri',
-//               label: 'View image',
-//               uri: product.imgUrl
-//             },
-//             actions: [
-//               {
-//                 type: 'postback',
-//                 label: 'I want to buy!',
-//                 data: `flow=shoping&action=buy&productID=${product.id}`
-//               }
-//             ]
-//           }))
-//         }
-//       };
-
-//       return carouselProducts;
-//     }
-//   }
-
-//   return null;
-// };
-
-// // Main event handler that determines the type of event and calls the appropriate handler
-// const handleEvent = async (event) => {
-//   let response = null;
-
-//   // Handle text messages
-//   response = await handleMessage(event);
-//   if (response) return response;
-
-//   // Handle postback actions
-//   response = await handlePostback(event);
-//   if (response) return response;
-
-//   // Default response for unknown event types
-//   return {
-//     type: 'text',
-//     text: 'I cannot understand this message.'
-//   };
-// };
-
-// module.exports = handleEvent;
+module.exports = { handleEvent };

@@ -1,4 +1,5 @@
-require('dotenv').config({ path: './application/.env' });
+const dotenv = require("dotenv");
+dotenv.config({ path: './application/.env' });
 const rp = require('request-promise');
 
 // Helper to enforce required parameters
