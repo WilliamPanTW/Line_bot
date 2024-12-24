@@ -8,20 +8,20 @@ module.exports.readProducts = async () => {
       pageSize: 10,
       sort: [{ field: 'id', direction: 'asc' }]
     });
-    console.log('Airtable result:', JSON.stringify(result)); // Log the entire result for debugging
 
-    // Process the records and ensure the required fields are present
-    const products = _.compact(_.map(result.records, record => {
+    // console.log('Airtable result:', JSON.stringify(result, null, 2)); // Log the entire result for debugging
+
+    result['products'] = _.compact(_.map(result.records, record => {
       const { fields } = record;
       const { id, name, detail, price, images } = fields;
-      
-      // Check if essential product data is missing
-      if (!(name && detail && price && images && images[0].url)) {
-        console.log(`Missing or incomplete data in product id: ${id}`); // Log incomplete product data
-        return null;  // If data is incomplete, skip this product
+
+      // Check for missing fields
+      if (!name || !detail || !price || !images || !images[0]?.url) {
+        // console.log(`Skipping product due to missing fields:`, { id, name, detail, price, images });
+        return null;
       }
 
-      // Return a structured product object
+      // Return structured product object
       return {
         id,
         name,
@@ -31,11 +31,12 @@ module.exports.readProducts = async () => {
       };
     }));
 
-    console.log('Processed products:', JSON.stringify(products)); // Log processed products for verification
-    return products;  // Return the processed list of products
+    // console.log('Processed products:', JSON.stringify(products, null, 2)); // Log processed products for verification
+    console.log('return success from product.js')
+    return result;
 
   } catch (error) {
-    console.error('Error reading products from Airtable:', error);  // Log any errors that occur
-    throw error;  // Re-throw the error so the caller can handle it
+    console.error('Error reading products from Airtable:', error);
+    throw error;
   }
 };
